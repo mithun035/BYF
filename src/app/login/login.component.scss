@@ -1,0 +1,38 @@
+.login-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 10px auto;
+    margin-top: 50px;
+    min-width: 150px;
+    max-width: 400px;
+    text-align: center;
+    
+}
+
+.login-as {
+    padding-bottom: 20px;
+}
+
+.login-button {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.image-background {
+    background-image: url('/assets/images/beachHouse.jpg');
+    height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.forgot-password {
+    text-align: center;
+    margin: 10px;
+}

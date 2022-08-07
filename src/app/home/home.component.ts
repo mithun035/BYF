@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
 import { ApiService } from '../api.service';
 import { IData } from '../IData';
+import { Papa } from 'ngx-papaparse';
+import { ChartType } from './chartType.enum';
+import * as moment from 'moment';
+import { CookieService } from 'ngx-cookie-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -10,74 +14,169 @@ import { IData } from '../IData';
 })
 export class HomeComponent implements OnInit {
 
-  csvData: any[] = [];
-  constructor(private apiservice: ApiService) { }
+  //master dat
+  csvData = [];
+  
+  //shipmodequantity pie chart
+  showShipModePieChart: boolean = false;
+  myPieData: any[] = [];
+
+  //category pie chart
+  showcategoryPieChart: boolean = false;
+  mycategoryData: any[] = [];
+
+
+  //city bar chart
+  showCityBarChart: boolean = false;
+  chartColumns = ['City', 'Profitability'];
+  myCityData: any[] = [];
+  mostProfitableCityData: any[] = [];
+  leastProfitableCityData: any[] = [];
+
+  myPieType = ChartType.PieChart;
+  myBarType = ChartType.BarChart;
+
+  myoptions = {
+    width: 500,
+    height: 500,
+    //title: 'Toppings I Like On My Pizza',
+    is3D: true,
+    //colors: ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6']
+  };
+
+  myData = [
+    ['Second Class', 266],
+    ['Standard Class', 714],
+    ['First Class', 231],
+  ];
+
+
+  constructor(private apiservice: ApiService, 
+    private papa: Papa, 
+    private cookie: CookieService,
+    private route: Router) {
+
+  }
 
   ngOnInit(): void {
     this.apiservice.getCsvData().
-    subscribe({
-      next: (data:any) => {
-        const llist: string[] = data.split('\n');
-        console.log('indi',typeof(llist[1].split(',')), llist[1].split(',')[6])
-        llist.forEach((e: string) => {
-          var ilist: string[] = e.split(',');
-          var b: IData = this.mapDataToIData(ilist);
-          this.csvData.push(b);
-        });
-        this.csvData = this.csvData.slice(1);
-        //console.log(this.csvData);
-      },
-      error: (err) => {
-        console.log(err);
-      },
-      complete: () =>{}
+      subscribe({
+        next: (data: any) => {
+          this.papa.parse(data, {
+            complete: (result) => {
+              const parsed = result.data;
+              const headers = parsed.shift();
+              this.csvData = parsed.map((row: any) => {
+                return row.reduce((all: any, col: any, idx: any) => {
+                  switch (headers[idx]) {
+                    case 'Order Date':
+                    case 'Ship Date':
+                      col = moment(col, "DD/MM/YY");
+                      break;
+                    case 'Row ID':
+                    case 'Quantity':
+                      col = parseInt(col, 10);
+                      break;
+                    case 'Sales':
+                    case 'Discount':
+                    case 'Profit':
+                      col = parseFloat(col);
+                      break;
+                  }
+                  return { ...all, [headers[idx]]: col};
+                }, {})
+              })
+            }
+          });
+        },
+        error: (err) => {
+          console.log(err);
+        },
+        complete: () => {
+          this.quantityOnShipMode();
+          this.categoryPercentage();
+          this.cityProfitability();
+          console.log("done");
+         }
+      })
+  }
+
+  cityProfitability() {
+    
+    var map = new Map();
+    var temp = this.csvData;    
+    temp.forEach((data: any) => {
+      if (map.has(data["City"]))
+        map.set(data["City"], map.get(data["City"]) + Number(data["Profit"]));
+      else
+        map.set(data["City"], Number(data["Profit"]));
     })
+    var tempData: (string | number)[][] = []
+    map.forEach((value: number, key: string) => {
+      const rowData = [key, value]
+      tempData.push(rowData);
+    })
+    tempData.sort((a: any, b:any) => a[1] - b[1]);
+
+    this.showCityBarChart = !this.showCityBarChart;
+
+    this.myCityData = tempData;//tempData.splice(-10, 10);
+    this.mostProfitableCityData = tempData.slice(-11,-1);
+    this.leastProfitableCityData = tempData.slice(0,10);
+    console.log(this.mostProfitableCityData);
+    console.log(this.leastProfitableCityData);
+    console.log('I reached city')
+
   }
 
-  mapDataToIData( a: string[]): IData {
-    console.log('a', a);
-    let data!: IData;
-    data.rowid = parseInt(a[0]);
-    data.orderId = a[1];
-    data.orderDate = new Date(a[2]);
-    data.shipdate = new Date(a[3]);
-    data.shipMode = a[4];
-    data.customerId = a[5];
-    data.customerName = a[6];
-    data.segment = a[7];
-    data.country = a[8];
-    data.city = a[9];
-    data.state = a[10];
-    data.postalCode = a[11];
-    data.region = a[12];
-    data.productId = a[13];
-    data.categoty = a[14];
-    data.subCategory = a[15];
-    data.productname = a[16];
-    data.sales = parseFloat(a[17]);
-    data.quantity = parseInt(a[18]);
-    data.discount = parseFloat(a[19]);
-    data.profit = parseFloat(a[20]);
-
-    return data;
+  categoryPercentage() {
+    
+    var map = new Map();
+    var temp = this.csvData;
+    temp.forEach((data: any) => {
+      if (map.has(data["Category"]))
+        map.set(data["Category"], map.get(data["Category"]) + 1);
+      else
+        map.set(data["Category"], 1);
+    })
+    map.size
+    var sum: number = map.size;
+    if (this.mycategoryData.length == 0) {
+      map.forEach((value: number, key: string,) => {
+        const percentage: number = (value / sum) * 100;
+        const rowData = [key, percentage]
+        this.mycategoryData.push(rowData);
+      })
+    }
+    console.log(this.mycategoryData);
+    console.log('I reached cat')
+    this.showcategoryPieChart = !this.showcategoryPieChart;
   }
-
-  ab = {
-    'shipMode': 4,
-    'quantity': 18,
-  } 
 
   quantityOnShipMode() {
+    
     var map = new Map();
-    this.csvData.forEach(( a: []) => {
-      if(map.has(a[this.ab.shipMode]))
-        map.set(a[this.ab.shipMode],map.get(a[this.ab.shipMode]) + a[this.ab.quantity]);
+    var temp = this.csvData;
+    temp.forEach((data: any) => {
+      if (map.has(data["Ship Mode"]))
+        map.set(data["Ship Mode"], map.get(data["Ship Mode"]) + parseInt(data["Quantity"]));
       else
-        map.set(a[this.ab.shipMode],a[this.ab.quantity])
-      }
-    );
+        map.set(data["Ship Mode"], parseInt(data["Quantity"]));
+    })
+    if (this.myPieData.length == 0) {
+      map.forEach((value: number, key: string,) => {
+        const rowData = [key, value];
+        this.myPieData.push(rowData);
+      });
+    }
+    console.log(this.myPieData);
+    console.log('I reached quan')
+    this.showShipModePieChart = !this.showShipModePieChart;
+  }
 
-    console.log("map", map);
+  logout(){
+    this.cookie.deleteAll();
+    this.route.navigate(['/login']);
   }
 
 }

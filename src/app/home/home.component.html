@@ -1,7 +1,43 @@
-<p>home works!</p>
+<!-- Nav Bar -->
+<app-nav-bar></app-nav-bar>
 
-<button (click)="quantityOnShipMode()">Click me!</button>
-
-<div *ngFor="let e of csvData">
-    <p>{{ e }}</p>
+<!-- <div *ngIf="showShipModePieChart"> -->
+<div *ngIf="showShipModePieChart">
+    <label for="pieChart">My shipmode quantity Pie Chart</label>
+    <google-chart [type]="myPieType" [data]="myPieData" name="pieChart" 
+    [options]="myoptions" *ngIf="showShipModePieChart">
+    </google-chart>
 </div>
+
+
+<!-- <div *ngIf="showcategoryPieChart"> -->
+<div *ngIf="showcategoryPieChart">
+    <label>Category Pie Chart</label>
+    <google-chart [type]="myPieType" [data]="mycategoryData" name="pieCategoryChart" 
+    [options]="myoptions" *ngIf="showcategoryPieChart">
+    </google-chart>
+</div>
+
+
+<!-- <div *ngIf="showCityBarChart"> -->
+<div *ngIf="showCityBarChart">
+    <label>Top 10 most profitable cities</label>
+    <google-chart [type]="myBarType" [data]="mostProfitableCityData" 
+    [width]="800" [height]="800" [columns]="chartColumns" *ngIf="showCityBarChart"> 
+    </google-chart>
+</div>
+
+<div *ngIf="showCityBarChart">
+    <label>Top 10 most least cities</label>
+    <google-chart [type]="myBarType" [data]="leastProfitableCityData" 
+    [width]="800" [height]="800" [columns]="chartColumns" *ngIf="showCityBarChart"> 
+    </google-chart>
+</div>
+
+<!-- <google-chart [type]="myType" [data]="myData"  [options]="myoptions"></google-chart> -->
+
+<!-- <google-chart [data]="myCityData" [type]="myBarType" [options]="myoptions"></google-chart> -->
+
+<!-- <div *ngFor="let e of csvData">
+    <p>{{ e }}</p>
+</div> -->

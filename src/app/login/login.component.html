@@ -1,9 +1,30 @@
-<h1>Login works</h1>
-
-<div>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <input formControlName="userName" type="text" name="userName" placeholder="Enter username" >
-        <input formControlName="password" type="password" name="password" placeholder="Enter password" >
-        <button [disabled]="!loginForm.valid">submit</button>
-    </form>
-</div>
+<body class="image-background">
+    <mat-card class="login-card">
+        <mat-card-content fxLayout="column" fxLayoutAlign="center center">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <h3 class="form-header" style="color: yellow;">Big Yellow Fish</h3>
+                <mat-form-field class="full-width" appearance="outline">
+                    <mat-label>Enter your User name</mat-label>
+                    <input matInput type="text" placeholder="Enter username" required="true" name="email"
+                        formControlName="userName">
+                </mat-form-field>
+                <mat-form-field class="full-width" appearance="outline">
+                    <mat-label>Enter your password</mat-label>
+                    <input matInput [type]="hide ? 'password' : 'text'" placeholder="Enter password" required="true"
+                        name="password" formControlName="password">
+                    <!-- <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
+                        [attr.aria-pressed]="hide" type="button"> -->
+                        <!-- <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon> -->
+                    <!-- </button> -->
+                </mat-form-field>
+                <div *ngIf="showError">
+                    <mat-label style="color:red;">Incorrect Email or Password</mat-label>
+                </div>
+                <div>
+                    <button class="login-button" type="submit" mat-raised-button color="primary"
+                    [disabled]="!loginForm.valid">Login</button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</body>

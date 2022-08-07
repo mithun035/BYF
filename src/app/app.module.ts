@@ -9,6 +9,10 @@ import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CookieService } from 'ngx-cookie-service';
 import { AppInterceptor } from './app.interceptor';
+import { GoogleChartsModule } from 'angular-google-charts';
+import { MaterialModule } from '../material.module';
+import { NavBarComponent } from './home/nav-bar/nav-bar.component';
+
 
 
 @NgModule({
@@ -16,13 +20,16 @@ import { AppInterceptor } from './app.interceptor';
     LoginComponent,
     AppComponent,
     HomeComponent,
+    NavBarComponent,
   ],
   imports: [
+    GoogleChartsModule,
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    MaterialModule,
   ],
   providers: [CookieService,
   {

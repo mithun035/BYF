@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormGroup, FormControl, Validators } from "@angular/forms";
+import { UntypedFormGroup, UntypedFormControl, Validators, FormControl, FormGroup } from "@angular/forms";
 import { Router } from "@angular/router";
 import { CookieService } from "ngx-cookie-service";
 import { ApiService } from "../api.service";
@@ -14,6 +14,8 @@ import { ILogin } from "../ILogin";
 
 export class LoginComponent implements OnInit {
     loginForm!: FormGroup;
+    hide: boolean = true;
+    showError: boolean = false;
     constructor(
         private apiService: ApiService,
         private router: Router,
@@ -26,12 +28,13 @@ export class LoginComponent implements OnInit {
         }
 
     ngOnInit(): void {
-        this.loginForm = new FormGroup(
+        this.loginForm = new UntypedFormGroup(
             {
                 userName: new FormControl('',Validators.required),
                 password: new FormControl('',Validators.required)
             }
         );
+        this.showError = false;
     }
 
     onSubmit(){
@@ -47,7 +50,7 @@ export class LoginComponent implements OnInit {
             },
             error: (err) => {
                 console.log(err);
-                console.log("login failed");
+                this.showError = true;
             },
             complete: () => {
                 this.router.navigate(['/home']);
