@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../api.service';
-import { IData } from '../IData';
 import { Papa } from 'ngx-papaparse';
 import { ChartType } from './chartType.enum';
 import * as moment from 'moment';
@@ -14,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
 
-  //master dat
+  //master data
   csvData = [];
   
   //shipmodequantity pie chart
@@ -39,17 +38,8 @@ export class HomeComponent implements OnInit {
   myoptions = {
     width: 500,
     height: 500,
-    //title: 'Toppings I Like On My Pizza',
     is3D: true,
-    //colors: ['#e0440e', '#e6693e', '#ec8f6e', '#f3b49f', '#f6c7b6']
   };
-
-  myData = [
-    ['Second Class', 266],
-    ['Standard Class', 714],
-    ['First Class', 231],
-  ];
-
 
   constructor(private apiservice: ApiService, 
     private papa: Papa, 
@@ -96,13 +86,12 @@ export class HomeComponent implements OnInit {
           this.quantityOnShipMode();
           this.categoryPercentage();
           this.cityProfitability();
-          console.log("done");
          }
       })
   }
 
-  cityProfitability() {
-    
+  cityProfitability() { 
+
     var map = new Map();
     var temp = this.csvData;    
     temp.forEach((data: any) => {
@@ -123,9 +112,6 @@ export class HomeComponent implements OnInit {
     this.myCityData = tempData;//tempData.splice(-10, 10);
     this.mostProfitableCityData = tempData.slice(-11,-1);
     this.leastProfitableCityData = tempData.slice(0,10);
-    console.log(this.mostProfitableCityData);
-    console.log(this.leastProfitableCityData);
-    console.log('I reached city')
 
   }
 
@@ -139,7 +125,6 @@ export class HomeComponent implements OnInit {
       else
         map.set(data["Category"], 1);
     })
-    map.size
     var sum: number = map.size;
     if (this.mycategoryData.length == 0) {
       map.forEach((value: number, key: string,) => {
@@ -148,8 +133,6 @@ export class HomeComponent implements OnInit {
         this.mycategoryData.push(rowData);
       })
     }
-    console.log(this.mycategoryData);
-    console.log('I reached cat')
     this.showcategoryPieChart = !this.showcategoryPieChart;
   }
 
@@ -169,8 +152,6 @@ export class HomeComponent implements OnInit {
         this.myPieData.push(rowData);
       });
     }
-    console.log(this.myPieData);
-    console.log('I reached quan')
     this.showShipModePieChart = !this.showShipModePieChart;
   }
 
